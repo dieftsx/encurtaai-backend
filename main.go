@@ -58,6 +58,11 @@ func main() {
 	router.GET("/:code", redirectURL)
 	router.GET("/api/stats/:code", getStats)
 
+}
+func handleOptions(c *gin.Context) {
+    c.Status(http.StatusNoContent)
+}
+
 	// Servidor com shutdown graceful
 	srv := &http.Server{
 		Addr:    ":8000",
@@ -115,12 +120,20 @@ func initDB() {
 // Middlewares e helpers
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		    c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+        c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+        c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        c.Writer.Header().Set("Access-Control-Expose-Headers", "Content-Length")
+        c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return 
+		}
 		c.Next()
 	}
 }
+
 
 func rateLimitMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
